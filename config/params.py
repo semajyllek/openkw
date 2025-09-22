@@ -13,6 +13,8 @@ DEFAULT_COMMANDS_PATH = Path(os.getcwd()) / "commands.json" # Used for initial c
 SAMPLE_RATE = 16000
 AUDIO_LENGTH_SECONDS = 1.0
 AUDIO_LENGTH_SAMPLES = int(SAMPLE_RATE * AUDIO_LENGTH_SECONDS)
+N_MELS = 40
+
 
 # Model Parameters
 MODEL_FILENAME = "kw_tcresnet_embedder.pth"
