@@ -1,0 +1,31 @@
+
+version: '3.9'
+
+services:
+  voice-dispatcher:
+    build: .
+    
+    # Run the container as the host user to match permissions on the PulseAudio socket
+    user: "${UID}:${GID}" 
+    
+    environment:
+      # CRITICAL: Tells the containerized PulseAudio client where to find the server socket on the host
+      - PULSE_SERVER=unix:/tmp/pulse.sock
+      
+    volumes:
+      # 1. Host PulseAudio Socket to Container PulseAudio Socket
+      # This is the standard, least-fragile way to forward audio I/O on Linux hosts.
+      - /run/user/${UID}/pulse/native:/tmp/pulse.sock
+      
+      # 2. Persist the user's config directory (for enrolled vectors)
+      # Note: We must map the host path to the /home/app_user/.config path inside the container.
+      - ${HOME}/.config/voice-cli-dispatcher:/home/app_user/.config/voice-cli-dispatcher
+
+      # 3. Read-only commands and audio samples
+      - ./commands:/app/commands:ro
+      - ./audio_samples:/app/audio_samples:rw # Must be R/W for 'enroll' command
+    
+    command: ["listen", "--threshold", "0.82"]
+    
+    # Allow the container to run in the background
+    restart: "on-failure"
