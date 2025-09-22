@@ -12,7 +12,7 @@ import os
 import itertools # Used for zipping loaders
 
 # Imports from your repository structure
-from model_arch.kw_model import KWTModel 
+from model_arch.kw_model import KW_Model 
 from data.kw_dataset import get_data_loaders, get_mel_spectrogram_transform, collate_fn
 from data.negative_dataset import NegativeWordUnitDataset 
 from data.weighted_sampler import HardNegativeWeightedSampler
