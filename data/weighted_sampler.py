@@ -7,7 +7,7 @@ from tqdm import tqdm
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Imports from your repository structure
-from model_arch.kws_model import KWTModel
+from model_arch.kw_model import KWModel
 from data.kws_dataset import get_mel_spectrogram_transform, collate_fn
 
 class HardNegativeWeightedSampler(Sampler):
