@@ -16,7 +16,7 @@ class HardNegativeWeightedSampler(Sampler):
     samples from a large pool based on their embedding distance to positive anchors.
     """
     def __init__(self, negative_dataset: Dataset, positive_anchors: np.ndarray, 
-                 model: KWModel, device: torch.device, batch_size: int, 
+                 model: KWTModel, device: torch.device, batch_size: int, 
                  reweight_frequency=1):
         
         self.negative_dataset = negative_dataset
