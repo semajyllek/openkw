@@ -15,7 +15,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 # Imports from your repository structure
 from model_arch.kwt_model import KWTModel 
 from data.kw_dataset import get_data_loaders, get_mel_spectrogram_transform
-from data.02_negative_dataset import NegativeWordUnitDataset 
+from data.negative_dataset import NegativeWordUnitDataset 
 from data.weighted_sampler import HardNegativeWeightedSampler
 from config.params import (
     N_MELS, EMBEDDING_DIM, SAMPLE_RATE, AUDIO_LENGTH_SAMPLES,
