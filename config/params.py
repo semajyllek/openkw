@@ -25,6 +25,7 @@ POSITIVE_DATA_PATH_REL = Path("my_wake_word")
 # --- AUDIO PARAMETERS ---
 SAMPLE_RATE = 16000
 AUDIO_LENGTH_SAMPLES = SAMPLE_RATE
+N_MELS = 40
 
 # --- HARD NEGATIVE MINING PARAMETERS ---
 LIBRISPEECH_SUBSET = "train-clean-100"  # LibriSpeech subset for negatives
