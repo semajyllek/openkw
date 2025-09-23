@@ -1,6 +1,5 @@
 
 from pathlib import Path
-import os
 import torch
 from typing import Set
 
@@ -8,47 +7,39 @@ from typing import Set
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # --- MODEL ARCHITECTURE PARAMETERS ---
-# Number of mel-frequency bands (audio features) - Standard for KWS/ASR
-N_MELS = 40 
+N_MELS = 40  # Number of mel-frequency bands
 EMBEDDING_DIM = 256  # Size of the final feature embedding layer
+NUM_CLASSES = 37  # 35 GSC classes + '_silence_' + '_unknown_'
 
 # --- AUDIO AND DATA PARAMETERS ---
-SAMPLE_RATE = 16000     # Standard sample rate for Speech Commands
+SAMPLE_RATE = 16000  # Standard sample rate for speech
 AUDIO_LENGTH_SAMPLES = SAMPLE_RATE  # 1 second of audio at 16000 samples
-NUM_CLASSES = 37        # 35 GSC classes + '_silence_' + '_unknown_' (fixed for GSC)
-DATA_PATH = Path("./data") # Root directory for data operations
 
 # --- TRAINING PARAMETERS ---
 NUM_EPOCHS = 30
 BATCH_SIZE = 64
-# Path where the best model weights will be saved
-MODEL_PATH = Path("models/best_kwt_model.pth") 
-
-# --- TRIPLET LOSS PARAMETERS ---
 TRIPLET_MARGIN = 0.2
-CE_LOSS_WEIGHT = 0.8    # Weight for Cross-Entropy Loss
-TRIPLET_LOSS_WEIGHT = 0.2 # Weight for Triplet Loss (CE_LOSS_WEIGHT + TRIPLET_LOSS_WEIGHT = 1.0)
+CE_LOSS_WEIGHT = 0.8  # Weight for Cross-Entropy Loss
+TRIPLET_LOSS_WEIGHT = 0.2  # Weight for Triplet Loss
+
+# --- PATHS (Defined relative to the project's data root) ---
+# The data root is passed in at runtime by the main training script.
+MODEL_PATH_REL = Path("models/best_kwt_model.pth")
+NEGATIVE_DATA_PATH_REL = Path("negative_word_units")
+EXTERNAL_DATA_ROOT_REL = Path("external_datasets")
 
 # --- HARD NEGATIVE MINING PARAMETERS ---
-# Directory where generated LibriSpeech word unit files are saved
-NEGATIVE_DATA_PATH = DATA_PATH / "negative_word_units" 
-# The LibriSpeech subset to download (e.g., 'train-clean-100' is 100 hours of clean speech)
-LIBRISPEECH_SUBSET = "train-clean-100" 
-NUM_NEGATIVES_TO_COLLECT = 50000 
-# Number of random short slices to attempt to extract from each long utterance
-NUM_SLICES_PER_UTTERANCE = 20 
+LIBRISPEECH_SUBSET = "train-clean-100"  # LibriSpeech subset for negatives
+NUM_NEGATIVES_TO_COLLECT = 50000  # Target number of negative samples to generate
+NUM_SLICES_PER_UTTERANCE = 20  # Number of segments to slice from each LibriSpeech utterance
 
-# List of all keywords (GSC + your custom ones) to ensure they are filtered out
-KNOWN_KEYWORDS: Set[str] = set([
-    "up", "down", "left", "right", "go", "stop", "yes", "no", 
-    "on", "off", "one", "two", "three", "four", "five", "six", 
-    "seven", "eight", "nine", "zero", "bed", "bird", "cat", 
-    "dog", "happy", "house", "marvin", "sheila", "tree", "wow",
+# --- KEYWORDS (GSC and Custom) ---
+GSC_KEYWORDS = [
+    "bed", "bird", "cat", "dog", "down", "eight", "five", "four",
+    "go", "happy", "house", "left", "marvin", "nine", "no", "off",
+    "on", "one", "right", "seven", "sheila", "six", "stop", "three",
+    "tree", "two", "up", "wow", "yes", "zero",
     "backward", "forward", "follow", "learn", "visual"
-    # IMPORTANT: ADD ANY CUSTOM KEYWORDS HERE
-])
-
-# --- DIRECTORY CHECK ---
-# Ensure directories exist upon module load for safety
-os.makedirs(MODEL_PATH.parent, exist_ok=True)
-os.makedirs(NEGATIVE_DATA_PATH, exist_ok=True)
+]
+CUSTOM_KEYWORDS = ["mykeyword", "trigger", "arm"]
+KNOWN_KEYWORDS: Set[str] = set(GSC_KEYWORDS + CUSTOM_KEYWORDS)
