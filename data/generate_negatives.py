@@ -13,13 +13,13 @@ sys.path.append(str(Path(__file__).parent.parent))
 # Import configuration from a centralized file
 from config.params import (
     SAMPLE_RATE, NEGATIVE_DATA_PATH_REL, EXTERNAL_DATA_ROOT_REL, LIBRISPEECH_SUBSET,
-    NUM_NEGATIVES_TO_COLLECT, NUM_SLICES_PER_UTTERANCE, KNOWN_KEYWORDS
+    NUM_NEGATIVES_TO_COLLECT, NUM_SLICES_PER_UTTERANCE
 )
 
 # Constants derived from config
 TARGET_LENGTH = SAMPLE_RATE # 1 second (16000 samples)
 
-def _segment_and_save_words(waveform, transcript, unique_id, total_saved_ref, negative_data_path):
+def _segment_and_save_words(waveform, unique_id, total_saved_ref, negative_data_path):
     """
     Samples short, word-centric segments, pads them to 1s, and saves as WAV files.
     This is an internal helper function.
@@ -28,12 +28,6 @@ def _segment_and_save_words(waveform, transcript, unique_id, total_saved_ref, ne
         waveform = waveform.mean(dim=0)
     
     num_samples = waveform.size(0)
-    words = transcript.lower().split()
-    
-    # Filter: Skip the whole utterance if it contains any known keyword
-    if any(word in KNOWN_KEYWORDS for word in words):
-        return 0
-
     samples_saved = 0
     
     for j in range(NUM_SLICES_PER_UTTERANCE):
@@ -127,7 +121,8 @@ def generate_word_unit_negatives(data_root: Path):
 
         unique_id = f"{speaker_id}_{chapter_id}_{utterance_id}"
         
-        _segment_and_save_words(waveform.squeeze(0), transcript, unique_id, total_saved_ref, negative_data_path)
+        # NOTE: The transcript is no longer used for filtering, but is still available.
+        _segment_and_save_words(waveform.squeeze(0), unique_id, total_saved_ref, negative_data_path)
 
     print(f"\n✅ Finished generating negatives. Total samples saved: {total_saved_ref[0]} in {negative_data_path}")
 
