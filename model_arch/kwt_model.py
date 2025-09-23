@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
-class KWModel(nn.Module):
+class KWTModel(nn.Module):
     """
     A simplified Time-Convolutional Residual Network (TC-ResNet)
     for Keyword Spotting, designed to output a fixed-size embedding.
