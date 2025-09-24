@@ -6,6 +6,7 @@ from tqdm import tqdm
 from pathlib import Path
 import sys
 import os
+import shutil
 
 # Add the project's root directory to the Python path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -18,6 +19,8 @@ from config.params import (
 
 # Constants derived from config
 TARGET_LENGTH = SAMPLE_RATE # 1 second (16000 samples)
+
+# --- (The _segment_and_save_words function remains the same) ---
 
 def _segment_and_save_words(waveform, unique_id, total_saved_ref, negative_data_path):
     """
@@ -34,7 +37,6 @@ def _segment_and_save_words(waveform, unique_id, total_saved_ref, negative_data_
         if total_saved_ref[0] >= NUM_NEGATIVES_TO_COLLECT:
             break
 
-        # 1. Sample a random slice length (200ms to 800ms)
         slice_ms = random.randint(200, 800)
         slice_samples = int(SAMPLE_RATE * (slice_ms / 1000.0))
         
@@ -46,7 +48,6 @@ def _segment_and_save_words(waveform, unique_id, total_saved_ref, negative_data_
         end = start + slice_samples
         segment = waveform[start:end]
 
-        # 2. Padding to 1 second
         padding_needed = TARGET_LENGTH - segment.size(0)
         
         if padding_needed > 0:
@@ -59,7 +60,6 @@ def _segment_and_save_words(waveform, unique_id, total_saved_ref, negative_data_
         if segment.size(0) != TARGET_LENGTH:
             continue
 
-        # 3. Save the padded 1-second segment
         filename = f"neg_{unique_id}_{j}.wav"
         save_path = negative_data_path / filename
         
@@ -74,6 +74,8 @@ def _segment_and_save_words(waveform, unique_id, total_saved_ref, negative_data_
         total_saved_ref[0] += 1
             
     return samples_saved
+
+# --- (The main function is updated below) ---
 
 def generate_word_unit_negatives(data_root: Path):
     """
@@ -96,14 +98,28 @@ def generate_word_unit_negatives(data_root: Path):
     total_saved_ref = [0]
     
     print(f"Downloading/loading LibriSpeech subset: {LIBRISPEECH_SUBSET}. This may take a while...")
-    
+
+    # Define the expected path for the extracted LibriSpeech dataset
+    extracted_dataset_path = external_data_root / "LibriSpeech" / LIBRISPEECH_SUBSET
+
     try:
-        # The 'root' argument ensures torchaudio downloads to the specified persistent path.
-        dataset = torchaudio.datasets.LIBRISPEECH(
-            root=str(external_data_root), 
-            url=LIBRISPEECH_SUBSET, 
-            download=True
-        )
+        # Check if the extracted dataset already exists
+        if os.path.exists(extracted_dataset_path) and len(os.listdir(extracted_dataset_path)) > 0:
+            print(f"✅ LibriSpeech dataset already exists at {extracted_dataset_path}. Skipping download.")
+            # Load the dataset from the existing directory
+            dataset = torchaudio.datasets.LIBRISPEECH(
+                root=str(external_data_root), 
+                url=LIBRISPEECH_SUBSET, 
+                download=False
+            )
+        else:
+            print(f"Downloading LibriSpeech to {external_data_root}...")
+            # Download and extract the dataset
+            dataset = torchaudio.datasets.LIBRISPEECH(
+                root=str(external_data_root), 
+                url=LIBRISPEECH_SUBSET, 
+                download=True
+            )
     except Exception as e:
         print(f"🛑 CRITICAL ERROR during LibriSpeech download. Check disk space/permissions for {external_data_root}: {e}")
         return # Halt execution on failure
@@ -121,7 +137,6 @@ def generate_word_unit_negatives(data_root: Path):
 
         unique_id = f"{speaker_id}_{chapter_id}_{utterance_id}"
         
-        # NOTE: The transcript is no longer used for filtering, but is still available.
         _segment_and_save_words(waveform.squeeze(0), unique_id, total_saved_ref, negative_data_path)
 
     print(f"\n✅ Finished generating negatives. Total samples saved: {total_saved_ref[0]} in {negative_data_path}")
@@ -129,7 +144,6 @@ def generate_word_unit_negatives(data_root: Path):
 
 if __name__ == '__main__':
     # This block allows the script to be run locally for testing.
-    # It assumes a relative path for local data storage.
     LOCAL_DATA_ROOT = Path("./local_run_data")
     os.makedirs(LOCAL_DATA_ROOT, exist_ok=True)
     generate_word_unit_negatives(LOCAL_DATA_ROOT)
