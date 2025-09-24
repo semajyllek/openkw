@@ -16,13 +16,15 @@ from config.params import SAMPLE_RATE, AUDIO_LENGTH_SAMPLES, NON_WAKE_WORD_LABEL
 
 # --- Helper Functions (used by both dataset classes) ---
 
+# In data/kw_dataset.py
+
+
 def collate_fn(batch: list) -> Dict[str, torch.Tensor]:
     """
-    Pads audio tensors in a batch to the longest sequence length.
-    This version is more robust and handles both dictionary and tuple outputs
-    from the dataset's __getitem__ method.
+    Pads audio tensors and stacks labels in a batch.
+    This version is more robust and handles both dictionary and tuple outputs,
+    and also ensures labels are tensors before stacking.
     """
-    # Check the format of the first item to determine how to unpack the batch
     first_item = batch[0]
     
     if isinstance(first_item, dict):
@@ -38,10 +40,14 @@ def collate_fn(batch: list) -> Dict[str, torch.Tensor]:
     # Pad the audio tensors to the longest length
     audio_padded = torch.nn.utils.rnn.pad_sequence(audio_tensors, batch_first=True, padding_value=0)
     
+    # Ensure all labels are tensors before stacking
+    labels_tensors = [torch.tensor(label) if not isinstance(label, torch.Tensor) else label for label in labels]
+    
     return {
         "audio": audio_padded,
-        "labels": torch.stack(labels)
+        "labels": torch.stack(labels_tensors)
     }
+
 
 # --- Dataset Classes ---
 
