@@ -19,9 +19,21 @@ from config.params import SAMPLE_RATE, AUDIO_LENGTH_SAMPLES, NON_WAKE_WORD_LABEL
 def collate_fn(batch: list) -> Dict[str, torch.Tensor]:
     """
     Pads audio tensors in a batch to the longest sequence length.
+    This version is more robust and handles both dictionary and tuple outputs
+    from the dataset's __getitem__ method.
     """
-    audio_tensors = [item["audio"] for item in batch]
-    labels = [item["labels"] for item in batch]
+    # Check the format of the first item to determine how to unpack the batch
+    first_item = batch[0]
+    
+    if isinstance(first_item, dict):
+        audio_tensors = [item["audio"] for item in batch]
+        labels = [item["labels"] for item in batch]
+    elif isinstance(first_item, tuple):
+        # Assumes the tuple is in the format (audio, labels)
+        audio_tensors = [item[0] for item in batch]
+        labels = [item[1] for item in batch]
+    else:
+        raise TypeError(f"Batch items must be a dict or a tuple, got {type(first_item)}")
 
     # Pad the audio tensors to the longest length
     audio_padded = torch.nn.utils.rnn.pad_sequence(audio_tensors, batch_first=True, padding_value=0)
