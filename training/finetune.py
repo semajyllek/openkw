@@ -69,7 +69,7 @@ def fine_tune_model(data_root: Path, wake_word_samples: Path):
     if not os.path.exists(wake_word_samples):
         raise FileNotFoundError(f"Custom wake word samples not found at: {wake_word_samples}. Please upload your samples first.")
         
-    positive_dataset = CustomWakeWordDataset(wake_word_samples, label=WAKE_WORD_LABEL)
+    positive_dataset = CustomWakeWordDataset(wake_word_samples)
     
     # --- Stage 1: Fine-tuning with Easy Negatives ---
     print("\n--- Stage 1: Initial Fine-tuning with Easy Negatives ---")
