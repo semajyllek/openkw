@@ -63,7 +63,7 @@ def fine_tune_model(data_root: Path, wake_word_samples: Path):
 
     # 2. Prepare DataLoaders
     negative_data_path = data_root / "negative_word_units"
-    negative_dataset = NegativeWordUnitDataset(negative_data_path, label=NON_WAKE_WORD_LABEL)
+    negative_dataset = NegativeWordUnitDataset(negative_data_path)
     
     # Check if custom wake word samples exist before creating the dataset
     if not os.path.exists(wake_word_samples):
