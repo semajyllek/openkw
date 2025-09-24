@@ -16,7 +16,7 @@ from config.params import (
     MODEL_PATH_REL, WAKE_WORD_LABEL, NON_WAKE_WORD_LABEL
 )
 from data.negative_dataset import NegativeWordUnitDataset
-from data.kw_dataset import CustomWakeWordDataset
+from data.kw_dataset import CustomWakeWordDataset, collate_fn
 from data.hard_negative_miner import HardNegativeMiner, HardNegativeDataset
 
 def _train_one_stage(model, processor, data_loader, device, epochs):
