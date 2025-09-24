@@ -30,7 +30,7 @@ def _train_one_stage(model, processor, data_loader, device, epochs):
         total_loss = 0
         for batch in tqdm(data_loader, desc=f"Training Epoch {epoch+1}"):
             inputs = processor(
-                audio=[b.numpy() for b in batch['audio']], 
+                audio=batch['audio'].squeeze(1), 
                 sampling_rate=16000, 
                 return_tensors="pt", 
                 padding=True
