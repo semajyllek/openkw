@@ -74,7 +74,7 @@ def fine_tune_model(data_root: Path, wake_word_samples: Path):
     # --- Stage 1: Fine-tuning with Easy Negatives ---
     print("\n--- Stage 1: Initial Fine-tuning with Easy Negatives ---")
     combined_dataset_easy = torch.utils.data.ConcatDataset([positive_dataset, negative_dataset])
-    combined_loader_easy = DataLoader(combined_dataset_easy, batch_size=BATCH_SIZE, shuffle=True)
+    combined_loader_easy = DataLoader(combined_dataset_easy, collate_fn=collate_fn, batch_size=BATCH_SIZE, shuffle=True)
     
     _train_one_stage(model, processor, combined_loader_easy, device, epochs=NUM_EPOCHS)
 
@@ -93,7 +93,7 @@ def fine_tune_model(data_root: Path, wake_word_samples: Path):
     
     # Combine the small positive dataset with the new, small, and difficult negative dataset
     combined_dataset_hard = torch.utils.data.ConcatDataset([positive_dataset, hard_negative_dataset])
-    combined_loader_hard = DataLoader(combined_dataset_hard, batch_size=BATCH_SIZE, shuffle=True)
+    combined_loader_hard = DataLoader(combined_dataset_hard, collate_fn=collate_fn, batch_size=BATCH_SIZE, shuffle=True)
     
     # Retrain for a few more epochs on the difficult examples
     _train_one_stage(model, processor, combined_loader_hard, device, epochs=NUM_EPOCHS)
