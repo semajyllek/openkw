@@ -36,7 +36,7 @@ def _train_one_stage(model, processor, data_loader, device, epochs):
                 padding=True
             )
             inputs = {k: v.to(device) for k, v in inputs.items()}
-            labels = batch['labels'].to(device)
+            labels = batch['labels'].to(device).long()
 
             outputs = model(**inputs, labels=labels)
             loss = outputs.loss
